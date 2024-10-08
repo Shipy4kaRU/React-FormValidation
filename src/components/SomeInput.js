@@ -29,6 +29,17 @@ const SomeInput = (props) => {
           isEmailClicked: action.value,
           isEmailValid: prevState.emailValue.includes("@"),
         };
+      case "FORM_SUBMIT":
+        return {
+          ...prevState,
+          nameValue: "",
+          emailValue: "",
+          isNameValid: false,
+          isEmailValid: false,
+          isNameClicked: false,
+          isEmailClicked: false,
+          isFormValid: false,
+        };
       default:
         return prevState;
     }
@@ -47,6 +58,7 @@ const SomeInput = (props) => {
   const submitFormHandler = (e) => {
     e.preventDefault();
     console.log("SENDING");
+    dispatchFormState({ type: "FORM_SUBMIT" });
   };
 
   const blurNameHandler = () => {
