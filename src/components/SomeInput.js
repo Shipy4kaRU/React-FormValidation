@@ -1,40 +1,116 @@
-import { useState } from "react";
+import { useReducer } from "react";
 
 const SomeInput = (props) => {
-  const [nameInput, setNameInput] = useState("");
-  const [click, setClick] = useState(false);
+  const formReducer = (prevState, action) => {
+    switch (action.type) {
+      case "NAME_INPUT":
+        return {
+          ...prevState,
+          nameValue: action.value,
+          isNameValid: action.value.trim() !== "",
+          isFormValid: action.value.trim() !== "" && prevState.isEmailValid,
+        };
+      case "EMAIL_INPUT":
+        return {
+          ...prevState,
+          emailValue: action.value,
+          isEmailValid: action.value.includes("@"),
+          isFormValid: prevState.isNameValid && action.value.includes("@"),
+        };
+      case "NAME_BLUR":
+        return {
+          ...prevState,
+          isNameClicked: action.value,
+          isNameValid: prevState.nameValue.trim() !== "",
+        };
+      case "EMAIL_BLUR":
+        return {
+          ...prevState,
+          isEmailClicked: action.value,
+          isEmailValid: prevState.emailValue.includes("@"),
+        };
+      default:
+        return prevState;
+    }
+  };
 
-  const isNameValid = nameInput.trim() !== "";
-  const isInputNotValid = click && !isNameValid;
+  const [formState, dispatchFormState] = useReducer(formReducer, {
+    nameValue: "",
+    emailValue: "",
+    isNameValid: false,
+    isEmailValid: false,
+    isNameClicked: false,
+    isEmailClicked: false,
+    isFormValid: false,
+  });
 
   const submitFormHandler = (e) => {
     e.preventDefault();
-    if (isNameValid) console.log("SENDING");
+    console.log("SENDING");
   };
 
-  const blurInputHandler = () => {
-    setClick(true);
+  const blurNameHandler = () => {
+    dispatchFormState({ type: "NAME_BLUR", value: true });
+  };
+
+  const blurEmailHandler = () => {
+    dispatchFormState({ type: "EMAIL_BLUR", value: true });
   };
 
   const changeNameHandler = (e) => {
-    setNameInput(e.target.value);
+    dispatchFormState({ type: "NAME_INPUT", value: e.target.value });
+  };
+
+  const changeEmailHandler = (e) => {
+    dispatchFormState({ type: "EMAIL_INPUT", value: e.target.value });
   };
 
   return (
     <form onSubmit={submitFormHandler}>
-      <div className={`form-control ${isInputNotValid ? "invalid input" : ""}`}>
+      <div
+        className={`form-control ${
+          formState.isNameClicked && !formState.isNameValid
+            ? "invalid input"
+            : ""
+        }`}
+      >
         <label htmlFor="name">Введите Имя</label>
         <input
           type="text"
           id="name"
           onChange={changeNameHandler}
-          value={nameInput}
-          onBlur={blurInputHandler}
+          value={formState.nameValue}
+          onBlur={blurNameHandler}
         />
       </div>
-      {isInputNotValid ? <p className="error-text">Обязательное поле</p> : ""}
+      {formState.isNameClicked && !formState.isNameValid ? (
+        <p className="error-text">Обязательное поле</p>
+      ) : (
+        ""
+      )}
+      <div
+        className={`form-control ${
+          formState.isEmailClicked && !formState.isEmailValid
+            ? "invalid input"
+            : ""
+        }`}
+      >
+        <label htmlFor="name">Введите email</label>
+        <input
+          type="text"
+          id="name"
+          onChange={changeEmailHandler}
+          value={formState.emailValue}
+          onBlur={blurEmailHandler}
+        />
+      </div>
+      {formState.isEmailClicked && !formState.isEmailValid ? (
+        <p className="error-text">Обязательное поле</p>
+      ) : (
+        ""
+      )}
       <div className="form-actions">
-        <button disabled={!isNameValid}>Отправить</button>
+        <button disabled={!formState.isFormValid}>Отправить</button>
       </div>
     </form>
   );
