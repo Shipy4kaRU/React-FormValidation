@@ -97,7 +97,7 @@ const SomeInput = (props) => {
       >
         <label htmlFor="name">Введите email</label>
         <input
-          type="text"
+          type="email"
           id="name"
           onChange={changeEmailHandler}
           value={formState.emailValue}
