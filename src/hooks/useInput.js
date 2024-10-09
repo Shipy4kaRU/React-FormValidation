@@ -1,59 +1,52 @@
 import { useReducer } from "react";
 
-const useInput = function (condition) {
-  const formReducer = (prevState, action) => {
+const useInput = function (func) {
+  const inputStateReducer = (prevState, action) => {
     switch (action.type) {
-      case "INPUT_ENTER":
-        return {
-          ...prevState,
-          inputValue: action.value,
-          isInputValid: condition(action.value),
-          // isInputValid: action.value.trim() !== "",
-        };
       case "INPUT_BLUR":
         return {
           ...prevState,
-          isInputClicked: action.value,
-          isInputValid: condition(prevState.inputValue),
-          //isInputValid: prevState.inputValue.trim() !== "",
+          isBlur: true,
+          isValid: func(prevState.value),
         };
-      case "RESET_INPUT":
+      case "INPUT_CHANGE":
         return {
           ...prevState,
-          inputValue: "",
-          isInputValid: false,
-          isInputClicked: false,
+          value: action.value,
+          isValid: func(action.value),
         };
+      case "INPUT_RESET":
+        return { ...prevState, value: "", isBlur: false, isValid: false };
       default:
-        return prevState;
+        return { ...prevState };
     }
   };
 
-  const [formState, dispatchFormState] = useReducer(formReducer, {
-    inputValue: "",
-    isInputValid: false,
-    isInputClicked: false,
+  const [inputState, dispatchInputState] = useReducer(inputStateReducer, {
+    value: "",
+    isBlur: false,
+    isValid: false,
   });
 
-  const changeInputHandler = (e) => {
-    dispatchFormState({ type: "INPUT_ENTER", value: e.target.value });
-  };
-
   const blurInputHandler = () => {
-    dispatchFormState({ type: "INPUT_BLUR", value: true });
+    dispatchInputState({ type: "INPUT_BLUR" });
   };
 
-  const resetValues = () => {
-    dispatchFormState({ type: "RESET_INPUT" });
+  const changeInputHandler = (e) => {
+    dispatchInputState({ type: "INPUT_CHANGE", value: e.target.value });
+  };
+
+  const resetInputHandler = () => {
+    dispatchInputState({ type: "INPUT_RESET" });
   };
 
   return {
-    value: formState.inputValue,
-    isValid: formState.isInputValid,
-    isClicked: formState.isInputClicked,
-    changeInputHandler,
+    value: inputState.value,
+    isBlur: inputState.isBlur,
+    isValid: inputState.isValid,
     blurInputHandler,
-    resetValues,
+    changeInputHandler,
+    resetInputHandler,
   };
 };
 
